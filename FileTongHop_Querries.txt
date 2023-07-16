@@ -1,0 +1,81 @@
+use quanlynhansu;
+Select * from hopdonglaodong;
+Select * from nhanvien;
+Select * from phongban;
+Select * from bangluong;
+
+-- 1. Lập danh sách nhân viên vào làm việc tại công ty từ ngày 8/3/2021: Mã nhân viên, Họ tên, Ngày sinh, Quê quán, Số điện thoại, Chức vụ, Ngày vào công ty, Tên bộ phận (nếu có).
+Select MaNV as 'Mã nhân viên', HoTen as 'Họ tên',NgaySinh as 'Ngày sinh',QueQuan as 'Quê quán',PHONGBAN.SoDienThoai as 'Số điện thoại',ChucVu as 'Chức vụ',NgayVao as 'Ngày vào công ty',TenPB as 'Phòng ban'
+from nhanvien, phongban
+where NgayVao>='2021-03-08' AND phongban.MaPB=nhanvien.MaPB;
+
+-- 2. Danh sách thông tin nhân viên kí hợp đồng chính thức sau ngày 01/03/2018: Mã nhân viên, Họ tên, Ngày sinh, Quê quán, Số điện thoại, Chức vụ, Ngày vào công ty, Tên bộ phận (nếu có).
+Select nhanvien.MaNV as 'Mã nhân viên', HoTen as 'Họ tên',NgaySinh as 'Ngày sinh',QueQuan as 'Quê quán',nhanvien.SoDienThoai as 'Số điện thoại',ChucVu as 'Chức vụ',TuNgay as 'Ngày vào công ty',TenPB as 'Phòng ban'
+from nhanvien, phongban, hopdonglaodong
+where TuNgay>'2018-03-01' AND phongban.MaPB=nhanvien.MaPB;
+
+-- 3. Trưởng phòng hành chính**
+SELECT MaNV AS 'Mã nhân viên', HoTen AS 'Họ tên', NgaySinh AS 'Ngày sinh', QueQuan AS 'Quê quán', nhanvien.SoDienThoai AS 'Số điện thoại', ChucVu AS 'Chức vụ', NgayVao AS 'Ngày vào công ty', LuongCoBan AS 'Lương cơ bản', PhuCap AS 'Phụ cấp'
+FROM nhanvien 
+INNER JOIN bangluong ON nhanvien.MaBangLuong = bangluong.MaBangLuong 
+INNER JOIN phongban ON phongban.MaPB = nhanvien.MaPB
+WHERE phongban.TenPB = 'Phòng Hành Chính' AND nhanvien.ChucVu = 'Trưởng phòng';
+
+
+-- 4. Tổng số nhân viên phòng kế hoạch
+SELECT COUNT(nhanvien.MaNV) AS 'Số lượng nhân viên', 
+       phongban.TenPB AS 'Tên phòng ban'
+FROM nhanvien 
+INNER JOIN phongban ON nhanvien.MaPB = phongban.MaPB 
+WHERE phongban.TenPB = 'Phòng Kế Hoạch'
+GROUP BY phongban.TenPB;
+
+-- 5. Danh sách nhân viên làm trên 4 năm
+Select MaNV as 'Mã nhân viên', HoTen as 'Họ tên',NgaySinh as 'Ngày sinh',QueQuan as 'Quê quán',nhanvien.SoDienThoai as 'Số điện thoại',ChucVu as 'Chức vụ',NgayVao as 'Ngày vào công ty',TenPB as 'Phòng ban'
+from nhanvien, phongban
+where nhanvien.MaPB = phongban.MaPB and (year(CURRENT_TIMESTAMP) - year(nhanvien.NgayVao)>4); 
+
+-- 6. Sửa thông tin ngày sinh của nhân viên có mã nhân viên là 3109 thành 15/3/1988
+Update NHANVIEN
+set NgaySinh='1988-03-15'
+where MaNV='31019';
+-- Kiểm tra
+select * from nhanvien
+where MaNV='31019';
+
+-- 7. Tìm kiếm nhân viên có tên là Nam
+select * from nhanvien
+where right(nhanvien.hoten,3)='Nam';
+
+-- 8. Xóa nhân viên có mã nhân viên là 31030 ra khỏi cơ sở dữ liệu
+Delete from nhanvien where MaNV='31030';
+Delete from hopdonglaodong where MaNV='31030';
+
+-- Kiểm tra xem dữ liệu đã được xóa hay chưa
+select count(*)
+from nhanvien
+where MaNV='31030';
+
+select count(*)
+from hopdonglaodong
+where MaNV='31030';
+
+
+-- 9. Lập danh sách thống kê tổng số nhân viên theo quê quán của mỗi phòng ban
+select TenPB as 'Phòng ban', QueQuan as 'Tỉnh thành', count(nhanvien.MaNV) as 'Số lượng nhân viên'
+from phongban, nhanvien
+where nhanvien.MaPB=phongban.MaPB
+group by phongban.TenPB, nhanvien.QueQuan
+order by count(nhanvien.MaNV) desc;
+
+-- 10. Tính trung bình mức lương (lương cơ bản + phụ cấp) của mỗi phòng ban trong công ty
+SELECT TenPB as 'Phòng ban', AVG(bangluong.LuongCoBan + bangluong.PhuCap) as 'Lương trung bình'
+FROM phongban
+INNER JOIN nhanvien ON phongban.MaPB = nhanvien.MaPB
+INNER JOIN bangluong ON nhanvien.MaBangLuong = bangluong.MaBangLuong
+GROUP BY phongban.TenPB;
+
+-- Tìm số lượng nhân viên theo từng pb
+select ten PB 
+from nhan vien, phong ban
+where nhanvien.MaNv = phongban.MaPB;
